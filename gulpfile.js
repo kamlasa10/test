@@ -10,6 +10,9 @@ const cleanCSS = require('gulp-cleancss');
 const concat = require('gulp-concat');
 const uglify = require('gulp-uglify');
 const babel = require('gulp-babel');
+const browserify = require('browserify');
+const watchify = require('watchify');
+const source = require('vinyl-source-stream');
 
 const rename = require('gulp-rename');
 const sourcemaps = require('gulp-sourcemaps');
@@ -45,6 +48,13 @@ function scripts() {
       .pipe(uglify())
       .pipe(concat('main.min.js'))
       .pipe(gulp.dest(paths.build + 'js/'))
+}
+function convertJs() {
+  return browserify(paths.src + 'js/main.js')
+    .bundle()
+    .pipe(watchify())
+    .pipe(source('bundle.js'))
+    .pipe(gulp.dest(paths.build + 'js'))
 }
 
 function htmls() {
@@ -87,6 +97,7 @@ exports.clean = clean;
 exports.watch = watch;
 exports.img = img;
 exports.fonts = fonts;
+exports.convertJs = convertJs;
 
 gulp.task('build', gulp.series(
     clean,
@@ -100,6 +111,6 @@ gulp.task('build', gulp.series(
 
 gulp.task('default', gulp.series(
     clean,
-    gulp.parallel(styles, scripts, htmls, img, fonts),
+    gulp.parallel(styles, scripts, htmls, img, fonts, convertJs),
     gulp.parallel(watch, serve)
 ));
